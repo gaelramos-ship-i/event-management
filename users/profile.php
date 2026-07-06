@@ -28,6 +28,39 @@ if (isset($_GET['id']) && $_GET['action'] == 'subscribe') {
         'id_event' => $_GET['id']
     ]);
 }
+
+//  Role organisateur 
+
+    $message = "";
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $title = htmlspecialchars($_POST['title']);
+        $date = htmlspecialchars($_POST['date']);
+        $place = htmlspecialchars($_POST['place']);
+        $desc = htmlspecialchars($_POST['desc']);
+
+        $isFormOk = true;
+
+        if (empty($title) || empty($date) || empty($place) || empty($desc)) {
+            $message = "Tous les champs doivent être renseignés";
+            $isFormOk = false;
+        }
+
+        if ($isFormOk) {
+
+            $data = $db->prepare("INSERT INTO events (title_event, date_event, place_event, description_event, fk_id_user) VALUE (:title, :date, :place, :desc, :id_user)");
+
+            $results = $data->execute([
+                'title' => $title,
+                'date' => $date,
+                'place' => $place,
+                'desc' => $desc,
+                'id_user' => $_SESSION['id_user']
+            ]);
+
+            header('location: ./profile.php');
+        }
+    }
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -86,8 +119,45 @@ if (isset($_GET['id']) && $_GET['action'] == 'subscribe') {
             <a href="?id=<?= $result['id_event'] ?>&action=cancel">Annuler !</a>
         </article>
     <?php
-    } ?>
+    }
 
+    
+
+    $data = $db->prepare("SELECT fk_id_role FROM users WHERE id_user = :id");
+
+    $data->execute([
+        'id' => $_SESSION['id_user']
+    ]);
+
+    $result = $data->fetch();
+
+    $id_role = $result['fk_id_role'];
+
+    if ($id_role == 2) { ?>
+
+        <h2>Mon espace organisateur :</h2>
+
+        <?= $message; ?>
+
+        <form action="#" method="post">
+            <label for="title">Titre :</label>
+            <input type="text" id="title" name="title">
+            <br>
+            <label for="date">Date :</label>
+            <input type="date" id="date" name="date">
+            <br>
+            <label for="place">Lieu :</label>
+            <input type="text" id="place" name="place">
+            <br>
+            <label for="desc">Description :</label>
+            <textarea name="desc" id="desc" placeholder="Décrire votre événement"></textarea>
+            <br>
+            <button>Ajouter</button>
+        </form>
+    <?php
+    }
+
+    ?>
 </body>
 
 </html>
