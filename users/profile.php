@@ -17,6 +17,7 @@ if (isset($_GET['id']) && $_GET['action'] == 'cancel') {
         'id_event' => $_GET['id']
     ]);
 }
+
 if (isset($_GET['id']) && $_GET['action'] == 'subscribe') {
 
     $req = "INSERT INTO events_has_users (fk_id_user, fk_id_event) VALUE (:id_user, :id_event)";
@@ -28,6 +29,7 @@ if (isset($_GET['id']) && $_GET['action'] == 'subscribe') {
         'id_event' => $_GET['id']
     ]);
 }
+
 if (isset($_GET['id']) && $_GET['action'] == 'delete') {
 
     $req = "DELETE FROM events WHERE id_event = :id_event";
@@ -161,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <br>
             <button>Ajouter</button>
         </form>
-        <?php
+    <?php
     }
 
     $req = "SELECT id_event, title_event, description_event, date_event, place_event FROM events WHERE fk_id_user = :id_user";
@@ -176,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     echo '<h2>Mes événements : </h2>';
 
-    if(!$results){
+    if (!$results) {
         echo "Vous n'organisez aucun événements";
     }
 
@@ -192,17 +194,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         $users = $data->fetchAll();
-        ?>
+    ?>
         <article>
             <h2><?= $result['title_event'] ?></h2>
             <p><?= $result['description_event'] ?></p>
             <p><?= $result['place_event'] ?> le <?= date("d/m/Y", strtotime($result['date_event'])) ?> </p>
+            <a href="./modify.php?id=<?= $result['id_event'] ?>">Modifier !</a>
             <a href="?id=<?= $result['id_event'] ?>&action=delete">Annuler !</a>
-        </article> 
+        </article>
 
         <?php
         echo "<h3>Liste des participants</h3>";
-        foreach ($users as $user) { 
+        foreach ($users as $user) {
         ?>
             <div>
                 <ul>
