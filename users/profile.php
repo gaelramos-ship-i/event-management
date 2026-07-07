@@ -212,8 +212,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <li><?= $user['firstname_user'] ?> | <?= $user['lastname_user'] ?> | <?= $user['email_user'] ?></li>
                 </ul>
             </div>
-    <?php
+        <?php
         }
+    }
+
+    if ($id_role == 1) {
+        ?>
+        <h2>Mon espace administrateur :</h2>
+    <?php
+    }
+
+    $req = "SELECT firstname_user, lastname_user, email_user FROM users";
+
+    $data = $db->prepare($req);
+
+    $data->execute();
+
+    $results = $data->fetchAll();
+
+    foreach($results as $result){
+        ?>
+        <ul>
+            <li><?= $result['firstname_user'] ?> | <?= $result['lastname_user'] ?> | <?= $result['email_user'] ?></li>
+        </ul> <?php
     }
     ?>
 </body>
