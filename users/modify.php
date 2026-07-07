@@ -1,7 +1,30 @@
 <?php session_start();
 require_once '../config/connect.php';
+
 $message = "";
 $idEvent = $_GET['id'];
+
+if (!isset($_SESSION["id_user"])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Faire un SELECT COUNT vers events en envoyant id_event et sur fk_id_user l'id de l'utilisateur
+// Si la valeur = 0 alors redigirer vers profile 
+
+$req = "SELECT COUNT(*) FROM events WHERE id_event = :id_event AND fk_id_user = :fk_id_user";
+$data = $db->prepare($req);
+$data->execute([
+    'id_event' => $idEvent,
+    'fk_id_user' => $_SESSION['id_user']
+]);
+$result = $data->fetch();
+
+if(!$result[0]){
+    header("Location: profile.php");
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = htmlspecialchars($_POST['title']);
     $date = htmlspecialchars($_POST['date']);
@@ -36,6 +59,7 @@ $datas->execute([
 ]);
 
 $results = $datas->fetch();
+
 ?>
 
 <!DOCTYPE html>
