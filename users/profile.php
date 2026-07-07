@@ -31,36 +31,36 @@ if (isset($_GET['id']) && $_GET['action'] == 'subscribe') {
 
 //  Role organisateur 
 
-    $message = "";
+$message = "";
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $title = htmlspecialchars($_POST['title']);
-        $date = htmlspecialchars($_POST['date']);
-        $place = htmlspecialchars($_POST['place']);
-        $desc = htmlspecialchars($_POST['desc']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title = htmlspecialchars($_POST['title']);
+    $date = htmlspecialchars($_POST['date']);
+    $place = htmlspecialchars($_POST['place']);
+    $desc = htmlspecialchars($_POST['desc']);
 
-        $isFormOk = true;
+    $isFormOk = true;
 
-        if (empty($title) || empty($date) || empty($place) || empty($desc)) {
-            $message = "Tous les champs doivent être renseignés";
-            $isFormOk = false;
-        }
-
-        if ($isFormOk) {
-
-            $data = $db->prepare("INSERT INTO events (title_event, date_event, place_event, description_event, fk_id_user) VALUE (:title, :date, :place, :desc, :id_user)");
-
-            $results = $data->execute([
-                'title' => $title,
-                'date' => $date,
-                'place' => $place,
-                'desc' => $desc,
-                'id_user' => $_SESSION['id_user']
-            ]);
-
-            header('location: ./profile.php');
-        }
+    if (empty($title) || empty($date) || empty($place) || empty($desc)) {
+        $message = "Tous les champs doivent être renseignés";
+        $isFormOk = false;
     }
+
+    if ($isFormOk) {
+
+        $data = $db->prepare("INSERT INTO events (title_event, date_event, place_event, description_event, fk_id_user) VALUE (:title, :date, :place, :desc, :id_user)");
+
+        $results = $data->execute([
+            'title' => $title,
+            'date' => $date,
+            'place' => $place,
+            'desc' => $desc,
+            'id_user' => $_SESSION['id_user']
+        ]);
+
+        header('location: ./profile.php');
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -107,7 +107,6 @@ if (isset($_GET['id']) && $_GET['action'] == 'subscribe') {
 
     if (!$results) {
         echo "<p>Vous n'êtes inscrit à aucun événements !</p>";
-        exit;
     }
 
     foreach ($results as $result) {
@@ -121,7 +120,6 @@ if (isset($_GET['id']) && $_GET['action'] == 'subscribe') {
     <?php
     }
 
-    
 
     $data = $db->prepare("SELECT fk_id_role FROM users WHERE id_user = :id");
 
@@ -154,9 +152,54 @@ if (isset($_GET['id']) && $_GET['action'] == 'subscribe') {
             <br>
             <button>Ajouter</button>
         </form>
-    <?php
+        <?php
     }
 
+
+    $req = "SELECT id_event, title_event, description_event, date_event, place_event FROM events WHERE fk_id_user = :id_user";
+
+    $data = $db->prepare($req);
+
+    $data->execute([
+        'id_user' => $_SESSION['id_user']
+    ]);
+
+    $results = $data->fetchAll();
+
+    echo '<h2>Mes événements : </h2>';
+
+    foreach ($results as $result) {
+        $req = "SELECT u.firstname_user, u.lastname_user, u.email_user 
+        FROM users AS u INNER JOIN events_has_users AS eu ON eu.fk_id_user = u.id_user 
+        WHERE eu.fk_id_event = :id_event";
+
+        $data = $db->prepare($req);
+
+        $data->execute([
+            'id_event' => $result['id_event']
+        ]);
+
+        $users = $data->fetchAll();
+       
+        ?>
+        <article>
+            <h2><?= $result['title_event'] ?></h2>
+            <p><?= $result['description_event'] ?></p>
+            <p><?= $result['place_event'] ?> le <?= date("d/m/Y", strtotime($result['date_event'])) ?> </p>
+        </article> 
+
+        <?php
+        echo "<h3>Liste des participants</h3>";
+        foreach ($users as $user) { 
+        ?>
+            <div>
+                <ul>
+                    <li><?= $user['firstname_user'] ?> | <?= $user['lastname_user'] ?> | <?= $user['email_user'] ?></li>
+                </ul>
+            </div>
+    <?php
+        }
+    }
     ?>
 </body>
 

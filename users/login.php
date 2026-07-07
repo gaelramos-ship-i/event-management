@@ -71,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <h1>Connexion</h1>
     <a href="register.php">Pas encore inscrit ?</a>
+    <?= $message; ?>
     <form action="#" method="post">
         <label for="email">Email :</label>
         <input type="text" id="email" name="email">
