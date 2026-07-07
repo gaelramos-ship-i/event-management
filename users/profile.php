@@ -28,6 +28,16 @@ if (isset($_GET['id']) && $_GET['action'] == 'subscribe') {
         'id_event' => $_GET['id']
     ]);
 }
+if (isset($_GET['id']) && $_GET['action'] == 'delete') {
+
+    $req = "DELETE FROM events WHERE id_event = :id_event";
+
+    $datas = $db->prepare($req);
+
+    $datas->execute([
+        'id_event' => $_GET['id']
+    ]);
+}
 
 //  Role organisateur 
 
@@ -120,7 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php
     }
 
-
     $data = $db->prepare("SELECT fk_id_role FROM users WHERE id_user = :id");
 
     $data->execute([
@@ -155,7 +164,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php
     }
 
-
     $req = "SELECT id_event, title_event, description_event, date_event, place_event FROM events WHERE fk_id_user = :id_user";
 
     $data = $db->prepare($req);
@@ -167,6 +175,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $results = $data->fetchAll();
 
     echo '<h2>Mes événements : </h2>';
+
+    if(!$results){
+        echo "Vous n'organisez aucun événements";
+    }
 
     foreach ($results as $result) {
         $req = "SELECT u.firstname_user, u.lastname_user, u.email_user 
@@ -180,12 +192,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         $users = $data->fetchAll();
-       
         ?>
         <article>
             <h2><?= $result['title_event'] ?></h2>
             <p><?= $result['description_event'] ?></p>
             <p><?= $result['place_event'] ?> le <?= date("d/m/Y", strtotime($result['date_event'])) ?> </p>
+            <a href="?id=<?= $result['id_event'] ?>&action=delete">Annuler !</a>
         </article> 
 
         <?php
